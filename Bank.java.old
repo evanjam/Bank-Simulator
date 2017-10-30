@@ -1,0 +1,166 @@
+import java.util.*;
+
+public class Bank
+{
+
+	class Node
+	{
+
+		public int arrival_time;
+		public int service_time;
+		public int total_time;
+		public Node next;
+	}
+
+
+	private Node first;
+	public int size = 0;
+
+	public Bank()
+	{
+		first = null;
+	}
+
+	public void insertFirst(int arr_time, int serv_time)
+	{
+		Node n = new Node();
+		n.arrival_time = arr_time;
+		n.service_time = serv_time;
+		n.next = first;
+		first = n;
+	}
+
+	public void insertLast(int arr_time, int serv_time)
+	{
+		Node n = new Node();
+		n.arrival_time = arr_time;
+		n.service_time = serv_time; 
+
+		if (first == null)
+		{
+			insertFirst(arr_time, serv_time);
+		}
+
+		else
+		{
+			Node temp = first;
+			while(temp.next != null)
+				temp = temp.next;
+			n.next = temp.next;
+			temp.next = n;
+		}
+		size++;
+	}
+
+	public Node removeFirst()
+	{
+		if (first == null)
+			throw new NoSuchElementException();
+
+		Node temp = new Node();
+		temp.arrival_time = first.arrival_time;
+		temp.service_time = first.service_time;
+
+		first = first.next;
+
+		size--;
+		return temp;
+	}
+
+	public void fillList (Bank x)
+	{ x.insertLast(0, 3); x.insertLast(0, 9); x.insertLast(1, 7); x.insertLast(2, 10); x.insertLast(3, 4); x.insertLast(4, 7); x.insertLast(5, 7); x.insertLast(5, 15); x.insertLast(6, 14); x.insertLast(12, 16); x.insertLast(14, 30); x.insertLast(17, 2); x.insertLast(19, 14); x.insertLast(22, 8); x.insertLast(22, 12); x.insertLast(23, 5); x.insertLast(24, 6); x.insertLast(25, 7); x.insertLast(27, 12); x.insertLast(30, 9); x.insertLast(33, 4); x.insertLast(34, 6); x.insertLast(36, 9); x.insertLast(38, 7); x.insertLast(39, 3); x.insertLast(40, 4); x.insertLast(41, 7); x.insertLast(41, 5); x.insertLast(42, 5); x.insertLast(42, 1); x.insertLast(42, 8); x.insertLast(42, 5); x.insertLast(45, 8); x.insertLast(47, 3); x.insertLast(48, 2); x.insertLast(49, 12); x.insertLast(50, 11); x.insertLast(50, 7); x.insertLast(51, 4); x.insertLast(56, 3);
+	}
+
+	public boolean isEmpty(Bank x)
+	{
+		if (x.first == null)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	public static boolean tellerListEmpty(Bank[] x)
+	{
+		for(int i=0; i<x.length; i++)
+		{
+			if (x[i].first != null)
+				return false;
+		}
+		return true;
+	}
+
+	public static void main(String[] args)
+	{
+		System.out.println("\nEvan\tLab2\tBank Simulation Program\tFall 2017\n");
+
+		Scanner keyin = new Scanner(System.in);
+
+		Bank customerList = new Bank();
+		customerList.fillList(customerList);
+
+		int timer = 0;
+		int total_wait_time = 0;
+		int temp;
+		do
+		{
+			System.out.println("How many tellers are staffed today?");
+			temp = keyin.nextInt();	
+			if(temp < 1)
+			{
+				System.out.print("enter a valid number greater than 1 dickhead\n");
+			}
+		} while(temp < 1);
+
+		Bank tellerList[] = new Bank[temp];
+		for(int x=0;x<temp;x++)
+		{
+			tellerList[x] = new Bank();
+		}
+
+		do
+		{
+			while(customerList.first != null && customerList.first.arrival_time == timer)
+			{
+				int tempShortest = 0;
+				Node removedCust = customerList.removeFirst();
+				for(int x=1; x<temp; x++)
+				{
+					if (tellerList[x].size <= tellerList[tempShortest].size)
+					{
+						tempShortest = x;
+					}
+				}
+				tellerList[tempShortest].insertLast(removedCust.arrival_time, removedCust.service_time);
+			}
+			for(int x=0; x<temp; x++)
+			{
+				if (tellerList[x].first != null && tellerList[x].first.service_time != 0)
+				{
+					tellerList[x].first.service_time--;
+					Node waitTemp = tellerList[x].first.next;
+					while(waitTemp != null)
+					{
+						waitTemp.total_time++;
+						waitTemp = waitTemp.next;
+					}
+				}
+				if (tellerList[x].first != null && tellerList[x].first.service_time == 0)
+				{
+					total_wait_time = total_wait_time + tellerList[x].first.total_time;
+					tellerList[x].removeFirst();
+				}
+			}
+			timer++;
+		} while(!customerList.isEmpty(customerList) || !tellerListEmpty(tellerList));
+
+		double avg_time = total_wait_time / 40;
+
+		System.out.print("\n******************************\nGlobal timer: " + timer + " iterations\n");
+		System.out.print("Total wait time: " + total_wait_time + "\nAverage wait time: " + avg_time + "\n\nSimulation Complete.\n");
+		System.out.print("*****************************\n\n");
+	}
+}
